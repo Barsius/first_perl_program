@@ -1,0 +1,62 @@
+<!-- index.html -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Table Data</title>
+</head>
+<body>
+
+<h1>Data Table</h1>
+
+<div id="table-container"></div>
+
+<h2>Add New Data</h2>
+<form id="data-form" method="POST" action="../getData.pl">
+    <label for="new_username">Username:</label>
+    <input type="text" id="new_username" name="new_username" required>
+
+    <label for="new_email">Email:</label>
+    <input type="text" id="new_email" name="new_email" required>
+
+    <label for="new_password">Password:</label>
+    <input type="text" id="new_password" name="new_password" required>
+
+    <input type="submit" name="submit" value="Add Data">
+</form>
+
+<script>
+        function loadTableData() {
+            var xhr = new XMLHttpRequest();
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState === 4 && xhr.status === 200) {
+                    document.getElementById('table-container').innerHTML = xhr.responseText;
+                }
+            };
+            xhr.open('GET', '../getData.pl', true);
+            xhr.send();
+        }
+
+        function deleteUser(id) {
+            var xhr = new XMLHttpRequest();
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState === 4) {
+                    if (xhr.status === 200) {
+                        console.log('DELETE request successful');
+                        loadTableData();
+                    } else {
+                        console.error('DELETE request failed with status: ' + xhr.status);
+                    }
+                }
+            };
+            xhr.open('DELETE', '../getData.pl?id=' + id, true);
+            xhr.send();
+        }
+
+        window.onload = loadTableData;
+    </script>
+
+</body>
+</html>
