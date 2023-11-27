@@ -6,14 +6,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Table Data</title>
+    <link rel="stylesheet" type="text/css" href="styles.css">
 </head>
 <body>
 
-<h1>Data Table</h1>
+<h1>Perl CRUD</h1>
 
 <div id="table-container"></div>
 
-<h2>Add New Data</h2>
+<h2>Add New User</h2>
 <form id="data-form" method="POST" action="../getData.pl">
     <label for="new_username">Username:</label>
     <input type="text" id="new_username" name="new_username" required>
@@ -26,6 +27,23 @@
 
     <input type="submit" name="submit" value="Add Data">
 </form>
+
+<!-- The Modal -->
+<div id="myModal">
+    <div>
+        <form method="POST" action="../getData.pl">
+            <label for="changedName">Name:</label>
+            <input type="text" id="changedName" name="changedName"><br>
+            <label for="changedEmail">Email:</label>
+            <input type="text" id="changedEmail" name="changedEmail"><br>
+            <label for="changedPassword">Password:</label>
+            <input type="text" id="changedPassword" name="changedPassword"><br>
+            <input type="hidden" id="userId" name="userId">
+            <input type="submit" value="Submit">
+        </form>
+        <button class="close" onclick="closeModal()">Close</button>
+    </div>
+</div>
 
 <script>
         function loadTableData() {
@@ -54,6 +72,24 @@
             xhr.open('DELETE', '../getData.pl?id=' + id, true);
             xhr.send();
         }
+
+        function openModal(name, email, password, userId) {
+            document.getElementById("changedName").value = name;
+            document.getElementById("changedEmail").value = email;
+            document.getElementById("changedPassword").value = password;
+            document.getElementById("userId").value = userId;
+            document.getElementById("myModal").style.display = "flex";
+        }
+
+        // Function to close the modal
+        function closeModal() {
+            document.getElementById("myModal").style.display = "none";
+        }
+
+        // Hide the modal initially
+        document.addEventListener("DOMContentLoaded", function() {
+            closeModal();
+        });
 
         window.onload = loadTableData;
     </script>

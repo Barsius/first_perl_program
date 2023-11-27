@@ -59,3 +59,12 @@ sub deleteUser {
     $delete_sth->execute($id);
     &disconnectFromDB;
 }
+
+sub updateUser {
+    &connectToDB;
+    my ($class, $username, $email, $password, $id) = @_;
+    my $update_sql = "UPDATE user t SET t.username = ?, t.email    = ?, t.password = ? WHERE t.user_id = ?;";
+    my $update_sth = $dbh->prepare($update_sql);
+    $update_sth->execute($username, $email, $password, $id);
+    &disconnectFromDB;
+}
