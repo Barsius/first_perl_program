@@ -68,3 +68,18 @@ sub updateUser {
     $update_sth->execute($username, $email, $password, $id);
     &disconnectFromDB;
 }
+
+sub getOrdersByUserId {
+    &connectToDB;
+    my ($class, $userId) = @_;
+    my $sql = "SELECT * FROM `order` WHERE user_id = ?";
+    my $sth = $dbh->prepare($sql);
+    $sth->execute($userId);
+
+    my @orders;
+    while (my $row = $sth->fetchrow_hashref) {
+        push(@orders, $row);
+    }
+    &disconnectFromDB;
+    @orders
+}

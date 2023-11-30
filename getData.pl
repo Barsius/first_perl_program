@@ -31,7 +31,7 @@ if ($cgi->param('new_username') && $cgi->param('new_email') && $cgi->param('new_
     print $cgi->header, $cgi->start_html('Users'),
         $cgi->h1('User List'),
         $cgi->start_table({ border => 1 }),
-        $cgi->Tr($cgi->th('User ID'), $cgi->th('Username'), $cgi->th('Email'), $cgi->th('Password'), $cgi->th('Delete'), $cgi->th('Edit')),
+        $cgi->Tr($cgi->th('User ID'), $cgi->th('Username'), $cgi->th('Email'), $cgi->th('Password'), $cgi->th('Delete'), $cgi->th('Edit'), $cgi->th('Orders')),
     ;
 
     foreach my $user (@users) {
@@ -43,7 +43,9 @@ if ($cgi->param('new_username') && $cgi->param('new_email') && $cgi->param('new_
                 -name    => 'Delete',
                 -onClick => "deleteUser($user->{user_id});")),
             $cgi->td($cgi->button(-name    => 'Edit',
-                -onClick => "openModal('$user->{username}', '$user->{email}', '$user->{password}', '$user->{user_id}');")));
+                -onClick => "openModal('$user->{username}', '$user->{email}', '$user->{password}', '$user->{user_id}');")),
+            $cgi->td($cgi->button(-name    => 'Orders',
+                -onClick => "openOrders($user->{user_id})")));
     }
 
     print $cgi->end_table;
