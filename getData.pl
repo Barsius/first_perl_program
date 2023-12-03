@@ -4,10 +4,14 @@ use warnings;
 use CGI;
 use DBI;
 use DBHandler;
+use MyUtils;
 
 my $cgi = CGI->new;
 
 if ($cgi->param('new_username') && $cgi->param('new_email') && $cgi->param('new_password')) {
+
+    #HANDLE POST REQUEST TO ADD USER
+
     my $new_username = $cgi->param('new_username');
     my $new_email    = $cgi->param('new_email');
     my $new_password = $cgi->param('new_password');
@@ -15,16 +19,27 @@ if ($cgi->param('new_username') && $cgi->param('new_email') && $cgi->param('new_
     DBHandler->createUser($new_username, $new_email, $new_password);
 
     print $cgi->redirect('static/new.html');
-    #print $cgi->header('text/html'),
-    #    "<script>window.location.reload();</script>";
     exit;
 } elsif ($cgi->param('id')) {
+
+    #HANDLE DELETE REQUEST TO DELETE USER
+
     my $id = $cgi->param('id');
     DBHandler->deleteUser($id);
 } elsif ($cgi->param('changedName') && $cgi->param('changedName') && $cgi->param('changedPassword') && $cgi->param('userId')){
+
+    #HANDLE POST REQUEST TO UPDATE USER
+
+    if (!MyUtils::is_valid_email(($cgi->param('changedEmail')))) {
+        print $cgi->header(-status => '400 Bad Request');
+        print "Invalid email address";
+        exit;
+    }
+
     DBHandler->updateUser($cgi->param('changedName'), $cgi->param('changedEmail'), $cgi->param('changedPassword'), $cgi->param('userId'));
-    print $cgi->redirect('static/new.html');
 } else {
+
+    #HANDLE GET REQUEST TO GET ALL USERS
 
     my @users = DBHandler->getAllUsers;
 

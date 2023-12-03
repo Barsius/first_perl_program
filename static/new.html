@@ -31,7 +31,7 @@
 <!-- The Modal -->
 <div id="myModal">
     <div>
-        <form method="POST" action="../getData.pl">
+        <form id="myModalForm">
             <label for="changedName">Name:</label>
             <input type="text" id="changedName" name="changedName"><br>
             <label for="changedEmail">Email:</label>
@@ -39,9 +39,9 @@
             <label for="changedPassword">Password:</label>
             <input type="text" id="changedPassword" name="changedPassword"><br>
             <input type="hidden" id="userId" name="userId">
-            <input type="submit" value="Submit">
         </form>
-        <button class="close" onclick="closeModal()">Close</button>
+        <button class="submitButton" onclick="submitMyModalForm()">Submit</button>
+        <button class="Close" onclick="closeModal()">Close</button>
     </div>
 </div>
 
@@ -71,6 +71,26 @@
             };
             xhr.open('DELETE', '../getData.pl?id=' + id, true);
             xhr.send();
+        }
+
+        function submitMyModalForm() {
+            var formData = new FormData(document.getElementById("myModalForm"));
+
+            var xhr = new XMLHttpRequest();
+            xhr.onreadystatechange = function() {
+                if (xhr.readyState === 4) {
+                    if (xhr.status === 200) {
+                        console.log(xhr.response);
+                        closeModal();
+                        loadTableData();
+                    } else if (xhr.status === 400) {
+                        document.getElementById("changedEmail").style.borderColor = "red";
+                    }
+                }
+            };
+
+            xhr.open('POST', '../getData.pl', true);
+            xhr.send(formData);
         }
 
         function openModal(name, email, password, userId) {
