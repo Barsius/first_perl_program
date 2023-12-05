@@ -83,3 +83,23 @@ sub getOrdersByUserId {
     &disconnectFromDB;
     @orders
 }
+
+sub getAllUsersWithOrders {
+    &connectToDB;
+    my $sql = "SELECT
+        u.user_id AS 'UserID',
+        u.username AS 'Username',
+        o.product_name AS 'Product',
+        o.quantity AS 'Quantity'
+        FROM `user` u
+        JOIN `order` o ON u.user_id = o.user_id;";
+    my $sth = $dbh->prepare($sql);
+    $sth->execute();
+
+    my @usersWithOrders;
+    while (my $row = $sth->fetchrow_hashref) {
+        push @usersWithOrders, $row;
+    }
+    &disconnectFromDB;
+    @usersWithOrders;
+}
