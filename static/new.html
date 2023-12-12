@@ -96,20 +96,16 @@
         }
 
         function submitNewUser() {
-            console.log('new user');
             var formData = new FormData(document.getElementById("newUserForm"));
-            console.log(formData);
 
             var xhr = new XMLHttpRequest();
             xhr.onreadystatechange = function() {
                 if (xhr.readyState === 4) {
                     if (xhr.status === 200) {
-                        console.log('success');
                         console.log(xhr.response);
                         loadTableData();
-                    } else if (xhr.status === 400) {
-                        console.log('Error');
-                        console.log(xhr.response);
+                    } else {
+                        console.log('Error creating new user');
                     }
                 }
             };
