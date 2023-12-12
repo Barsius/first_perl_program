@@ -17,9 +17,6 @@ if ($cgi->param('new_username') && $cgi->param('new_email') && $cgi->param('new_
     my $new_password = $cgi->param('new_password');
 
     DBHandler->createUser($new_username, $new_email, $new_password);
-
-    print $cgi->redirect('static/new.html');
-    exit;
 } elsif ($cgi->param('id')) {
 
     #HANDLE DELETE REQUEST TO DELETE USER
