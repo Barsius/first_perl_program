@@ -5,6 +5,7 @@ use File::Path qw(make_path);
 use Text::CSV qw( csv );
 use List::Util qw(any);
 use Date::Parse;
+use DBHandler;
 
 my ($raw_data, $district_1, $district_2) = qw(raw_data district_1 district_2);
 my ($resultDir, $beforeDir, $afterDir) = qw(filtered_data before_2000 after2000);
@@ -65,6 +66,40 @@ sub createAndPopulateFiles {
     close $fh or die "$empty_data_txt: $!";
 }
 
+sub createAndPopulateFilesFromDB {
+    my $raw_data_csv = "$raw_data/data.csv";
+    my $district_1_csv = "$raw_data/$district_1/data2.csv";
+    my $empty_data_txt = "$raw_data/$district_2/empty.txt";
+
+    my @raw_data = DBHandler::getAllRawData;
+
+    my @data_first_half = splice(@raw_data, 0, @raw_data/2);
+    my @data_second_half = @raw_data;
+
+    my $csv = Text::CSV->new ({ binary => 1, auto_diag => 1, eol => "\n" });
+
+    open my $fh, ">:encoding(utf8)", $raw_data_csv or die "$raw_data_csv: $!";
+    $csv->print($fh, ['First Name', 'Last Name', 'City', 'Date of Birth']);
+    if(@data_first_half) {
+        foreach my $record (@data_first_half) {
+            $csv->print($fh, [@$record{('FIRST_NAME', 'LAST_NAME', 'CITY', 'DATE_OF_BIRTH')}]);
+        }
+    }
+    close $fh or die "$raw_data_csv: $!";
+
+    open $fh, ">:encoding(utf8)", $district_1_csv or die "$district_1_csv: $!";
+    $csv->print($fh, ['First Name', 'Last Name', 'City', 'Date of Birth']);
+    if(@data_second_half) {
+        foreach my $record (@data_second_half) {
+            $csv->print($fh, [@$record{('FIRST_NAME', 'LAST_NAME', 'CITY', 'DATE_OF_BIRTH')}]);
+        }
+    }
+    close $fh or die "$district_1_csv: $!";
+
+    open $fh, ">:encoding(utf8)", $empty_data_txt or die "$empty_data_txt: $!";
+    close $fh or die "$empty_data_txt: $!";
+}
+
 sub createResultsFiles {
     my $result_before_csv = "$resultDir/$beforeDir/before_2000.csv";
     my $result_after_csv = "$resultDir/$afterDir/after_2000.csv";
@@ -98,6 +133,18 @@ sub process_csv {
         print "Processing:$full_path\n";
         filterAndSaveHashFromCsv($full_path, $result_before_absolute_path, $result_after_absolute_path);
     }
+}
+
+sub process_csv_to_db {
+        my $file = $_;
+        my $file_extension = 'csv';
+
+        return unless $file =~ /\.($file_extension)$/i;
+
+        my $full_path = File::Spec->rel2abs($file);
+
+        print "Processing:$full_path\n";
+        filterAndSaveHashFromCsvToDB($full_path);
 }
 
 sub filterAndSaveHashFromCsv {
@@ -135,6 +182,36 @@ sub filterAndSaveHashFromCsv {
             $csv->print($fh, [@$record{('City', 'First Name', 'Date of Birth', 'Last Name')}]);
         }
         close $fh or die "Could not close '$fullPathToResultAfter': $!";
+    }
+}
+
+sub filterAndSaveHashFromCsvToDB {
+    my ($fullPathToData) = @_;
+
+    my $aoh = csv (in => $fullPathToData, headers => "auto");
+    my %first_hash = %{$aoh->[0]};
+    return unless keysAreValid(keys(%first_hash));
+
+    my $centralDate = str2time("2000-01-01");
+
+    my @before2000;
+    my @after2000;
+
+    foreach my $hash_ref (@$aoh) {
+        if (str2time($hash_ref->{"Date of Birth"}) < $centralDate) {
+            push(@before2000, $hash_ref);
+        } else {
+            push(@after2000, $hash_ref);
+        }
+    }
+
+    if(@before2000) {
+        my $arrayRef = \@before2000;
+        DBHandler::saveDataBefore2000($arrayRef);
+    }
+    if (@after2000) {
+        my $arrayRef = \@after2000;
+        DBHandler::saveDataAfter2000($arrayRef);
     }
 }
 

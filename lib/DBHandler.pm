@@ -42,6 +42,48 @@ sub getAllUsers {
     @users;
 }
 
+sub getAllRawData {
+    &connectToDB;
+    my $sql = "SELECT * FROM RAW_DATA";
+    my $sth = $dbh->prepare($sql);
+    $sth->execute();
+
+    my @raw_data;
+    while (my $row = $sth->fetchrow_hashref) {
+        push(@raw_data, $row);
+    }
+    &disconnectFromDB;
+    @raw_data;
+}
+
+sub saveDataBefore2000 {
+    &connectToDB;
+    my ($dataRef) = shift;
+    my @data = @$dataRef;
+
+    my $insert_query = "INSERT INTO FILTERED_DATA_BEFORE_2000 (FIRST_NAME, LAST_NAME, CITY, DATE_OF_BIRTH) VALUES (?, ?, ?, ?)";
+    my $insert_stmt = $dbh->prepare($insert_query);
+    foreach my $record (@data) {
+        $insert_stmt->execute($record->{"First Name"}, $record->{"Last Name"}, $record->{"City"}, $record->{"Date of Birth"});
+    }
+    $insert_stmt->finish();
+    &disconnectFromDB;
+}
+
+sub saveDataAfter2000 {
+    &connectToDB;
+    my ($dataRef) = shift;
+    my @data = @$dataRef;
+
+    my $insert_query = "INSERT INTO FILTERED_DATA_AFTER_2000 (FIRST_NAME, LAST_NAME, CITY, DATE_OF_BIRTH) VALUES (?, ?, ?, ?)";
+    my $insert_stmt = $dbh->prepare($insert_query);
+    foreach my $record (@data) {
+        $insert_stmt->execute($record->{"First Name"}, $record->{"Last Name"}, $record->{"City"}, $record->{"Date of Birth"});
+    }
+    $insert_stmt->finish();
+    &disconnectFromDB;
+}
+
 sub createUser {
     &connectToDB;
     my ($class, $username, $email, $password) = @_;
